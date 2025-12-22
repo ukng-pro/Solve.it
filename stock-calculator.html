@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주식 수익률 계산기 - Solve.it</title>
+    <meta name="description" content="매수가와 매도가를 입력하여 주식 수익률을 간편하게 계산하세요. 수수료와 세금까지 반영한 실제 수익을 확인할 수 있습니다.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'pretendard': ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        'apple-blue': '#007AFF',
+                        'apple-gray': '#F2F2F7',
+                        'apple-dark': '#1C1C1E',
+                        'apple-dark-card': '#2C2C2E',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .dark .glass { background: rgba(28, 28, 30, 0.8); }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="bg-white dark:bg-apple-dark text-gray-900 dark:text-white min-h-screen transition-colors duration-300">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-700/50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html" class="text-xl font-bold text-apple-blue">Solve.it</a>
+                <button id="darkModeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-2xl mx-auto">
+            <!-- Title -->
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="trending-up" class="w-8 h-8 text-blue-600 dark:text-blue-400"></i>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">주식 수익률 계산기</h1>
+                <p class="text-gray-500 dark:text-gray-400">매수가와 매도가를 입력하여 수익률을 계산하세요</p>
+            </div>
+
+            <!-- Calculator Card -->
+            <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 sm:p-8 shadow-sm mb-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <!-- 매수가 -->
+                    <div>
+                        <label for="buyPrice" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">매수가 (원)</label>
+                        <input type="number" id="buyPrice" placeholder="10,000" class="w-full px-4 py-3 bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all">
+                    </div>
+                    <!-- 매도가 -->
+                    <div>
+                        <label for="sellPrice" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">매도가 (원)</label>
+                        <input type="number" id="sellPrice" placeholder="12,000" class="w-full px-4 py-3 bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    <!-- 수량 -->
+                    <div>
+                        <label for="quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">수량 (주)</label>
+                        <input type="number" id="quantity" placeholder="100" value="1" class="w-full px-4 py-3 bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all">
+                    </div>
+                    <!-- 수수료율 -->
+                    <div>
+                        <label for="feeRate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">수수료율 (%)</label>
+                        <input type="number" id="feeRate" placeholder="0.015" value="0.015" step="0.001" class="w-full px-4 py-3 bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all">
+                    </div>
+                </div>
+
+                <!-- 세금 옵션 -->
+                <div class="mb-6">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" id="includeTax" checked class="w-5 h-5 rounded border-gray-300 text-apple-blue focus:ring-apple-blue">
+                        <span class="text-sm text-gray-700 dark:text-gray-300">세금 포함 (매도 시 0.23%)</span>
+                    </label>
+                </div>
+
+                <!-- 계산 버튼 -->
+                <button id="calculateBtn" class="w-full py-4 bg-apple-blue text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors">
+                    수익률 계산하기
+                </button>
+            </div>
+
+            <!-- Results -->
+            <div id="results" class="hidden">
+                <!-- 수익률 카드 -->
+                <div id="profitCard" class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 sm:p-8 text-white mb-4">
+                    <p class="text-green-100 text-sm mb-1">총 수익률</p>
+                    <p id="profitRate" class="text-4xl sm:text-5xl font-bold mb-2">+20.00%</p>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="trending-up" class="w-5 h-5"></i>
+                        <span id="profitAmount" class="text-lg">+200,000원</span>
+                    </div>
+                </div>
+
+                <!-- 상세 정보 -->
+                <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 shadow-sm">
+                    <h3 class="font-semibold mb-4">상세 내역</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">매수 금액</span>
+                            <span id="totalBuy" class="font-medium">1,000,000원</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">매도 금액</span>
+                            <span id="totalSell" class="font-medium">1,200,000원</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">매수 수수료</span>
+                            <span id="buyFee" class="font-medium text-red-500">-150원</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">매도 수수료</span>
+                            <span id="sellFee" class="font-medium text-red-500">-180원</span>
+                        </div>
+                        <div id="taxRow" class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">세금 (0.23%)</span>
+                            <span id="taxAmount" class="font-medium text-red-500">-2,760원</span>
+                        </div>
+                        <div class="flex justify-between py-3">
+                            <span class="font-semibold">실현 손익</span>
+                            <span id="netProfit" class="font-bold text-green-500">+196,910원</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back Link -->
+            <div class="mt-8 text-center">
+                <a href="index.html" class="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-apple-blue transition-colors">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    모든 도구 보기
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Dark Mode
+        const html = document.documentElement;
+        if (localStorage.getItem('darkMode') === 'true' || (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        }
+        document.getElementById('darkModeToggle').addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('darkMode', html.classList.contains('dark'));
+            lucide.createIcons();
+        });
+
+        // Format number with commas
+        const formatNumber = (num) => {
+            return num.toLocaleString('ko-KR');
+        };
+
+        // Calculate
+        document.getElementById('calculateBtn').addEventListener('click', () => {
+            const buyPrice = parseFloat(document.getElementById('buyPrice').value) || 0;
+            const sellPrice = parseFloat(document.getElementById('sellPrice').value) || 0;
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            const feeRate = parseFloat(document.getElementById('feeRate').value) / 100 || 0.00015;
+            const includeTax = document.getElementById('includeTax').checked;
+            const taxRate = 0.0023; // 0.23%
+
+            if (buyPrice <= 0 || sellPrice <= 0) {
+                alert('매수가와 매도가를 입력해주세요.');
+                return;
+            }
+
+            const totalBuy = buyPrice * quantity;
+            const totalSell = sellPrice * quantity;
+            const buyFee = Math.floor(totalBuy * feeRate);
+            const sellFee = Math.floor(totalSell * feeRate);
+            const tax = includeTax ? Math.floor(totalSell * taxRate) : 0;
+
+            const grossProfit = totalSell - totalBuy;
+            const netProfit = grossProfit - buyFee - sellFee - tax;
+            const profitRate = ((netProfit / totalBuy) * 100);
+
+            // Update UI
+            const profitCard = document.getElementById('profitCard');
+            const isProfit = netProfit >= 0;
+
+            if (isProfit) {
+                profitCard.className = 'bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 sm:p-8 text-white mb-4';
+                document.getElementById('profitRate').textContent = '+' + profitRate.toFixed(2) + '%';
+                document.getElementById('profitAmount').textContent = '+' + formatNumber(netProfit) + '원';
+            } else {
+                profitCard.className = 'bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-6 sm:p-8 text-white mb-4';
+                document.getElementById('profitRate').textContent = profitRate.toFixed(2) + '%';
+                document.getElementById('profitAmount').textContent = formatNumber(netProfit) + '원';
+            }
+
+            document.getElementById('totalBuy').textContent = formatNumber(totalBuy) + '원';
+            document.getElementById('totalSell').textContent = formatNumber(totalSell) + '원';
+            document.getElementById('buyFee').textContent = '-' + formatNumber(buyFee) + '원';
+            document.getElementById('sellFee').textContent = '-' + formatNumber(sellFee) + '원';
+            document.getElementById('taxAmount').textContent = '-' + formatNumber(tax) + '원';
+            document.getElementById('taxRow').style.display = includeTax ? 'flex' : 'none';
+
+            const netProfitEl = document.getElementById('netProfit');
+            netProfitEl.textContent = (isProfit ? '+' : '') + formatNumber(netProfit) + '원';
+            netProfitEl.className = 'font-bold ' + (isProfit ? 'text-green-500' : 'text-red-500');
+
+            document.getElementById('results').classList.remove('hidden');
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

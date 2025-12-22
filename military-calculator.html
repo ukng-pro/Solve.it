@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>군 전역일 계산기 - Solve.it</title>
+    <meta name="description" content="입대일을 입력하면 전역일과 복무 진행률을 자동으로 계산해드립니다. 육군, 해군, 공군, 해병대 지원.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'pretendard': ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        'apple-blue': '#007AFF',
+                        'apple-gray': '#F2F2F7',
+                        'apple-dark': '#1C1C1E',
+                        'apple-dark-card': '#2C2C2E',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .dark .glass { background: rgba(28, 28, 30, 0.8); }
+    </style>
+</head>
+<body class="bg-white dark:bg-apple-dark text-gray-900 dark:text-white min-h-screen transition-colors duration-300">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-700/50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html" class="text-xl font-bold text-apple-blue">Solve.it</a>
+                <button id="darkModeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-2xl mx-auto">
+            <!-- Title -->
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="shield" class="w-8 h-8 text-green-600 dark:text-green-400"></i>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">군 전역일 계산기</h1>
+                <p class="text-gray-500 dark:text-gray-400">입대일과 군종을 선택하면 전역일을 계산해드립니다</p>
+            </div>
+
+            <!-- Calculator Card -->
+            <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 sm:p-8 shadow-sm mb-6">
+                <!-- 군종 선택 -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">군종 선택</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <button class="branch-btn active px-4 py-3 rounded-xl text-sm font-medium bg-apple-blue text-white transition-all" data-branch="army" data-days="548">
+                            육군
+                        </button>
+                        <button class="branch-btn px-4 py-3 rounded-xl text-sm font-medium bg-white dark:bg-apple-dark text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-apple-blue transition-all" data-branch="navy" data-days="609">
+                            해군
+                        </button>
+                        <button class="branch-btn px-4 py-3 rounded-xl text-sm font-medium bg-white dark:bg-apple-dark text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-apple-blue transition-all" data-branch="airforce" data-days="639">
+                            공군
+                        </button>
+                        <button class="branch-btn px-4 py-3 rounded-xl text-sm font-medium bg-white dark:bg-apple-dark text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-apple-blue transition-all" data-branch="marine" data-days="548">
+                            해병대
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 입대일 입력 -->
+                <div class="mb-6">
+                    <label for="enlistDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">입대일</label>
+                    <input type="date" id="enlistDate" class="w-full px-4 py-3 bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all">
+                </div>
+
+                <!-- 계산 버튼 -->
+                <button id="calculateBtn" class="w-full py-4 bg-apple-blue text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors">
+                    전역일 계산하기
+                </button>
+            </div>
+
+            <!-- Results -->
+            <div id="results" class="hidden">
+                <!-- 전역일 카드 -->
+                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 sm:p-8 text-white mb-4">
+                    <p class="text-green-100 text-sm mb-1">전역 예정일</p>
+                    <p id="dischargeDate" class="text-3xl sm:text-4xl font-bold mb-4">2025년 12월 25일</p>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                        <span id="dday" class="text-lg">D-365</span>
+                    </div>
+                </div>
+
+                <!-- 진행률 카드 -->
+                <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 sm:p-8 shadow-sm mb-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-gray-600 dark:text-gray-400">복무 진행률</span>
+                        <span id="progressPercent" class="text-2xl font-bold text-apple-blue">0%</span>
+                    </div>
+                    <div class="w-full h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div id="progressBar" class="h-full bg-gradient-to-r from-apple-blue to-blue-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        <span id="servedDays">0일 복무</span>
+                        <span id="remainingDays">0일 남음</span>
+                    </div>
+                </div>
+
+                <!-- 상세 정보 -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-5 text-center">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-1">총 복무일</p>
+                        <p id="totalDays" class="text-xl font-bold">548일</p>
+                    </div>
+                    <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-5 text-center">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-1">복무 개월</p>
+                        <p id="totalMonths" class="text-xl font-bold">18개월</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back Link -->
+            <div class="mt-8 text-center">
+                <a href="index.html" class="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-apple-blue transition-colors">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    모든 도구 보기
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Dark Mode
+        const html = document.documentElement;
+        if (localStorage.getItem('darkMode') === 'true' || (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        }
+        document.getElementById('darkModeToggle').addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('darkMode', html.classList.contains('dark'));
+            lucide.createIcons();
+        });
+
+        // Branch Selection
+        let selectedDays = 548;
+        document.querySelectorAll('.branch-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.branch-btn').forEach(b => {
+                    b.classList.remove('active', 'bg-apple-blue', 'text-white');
+                    b.classList.add('bg-white', 'dark:bg-apple-dark', 'text-gray-600', 'dark:text-gray-300', 'border', 'border-gray-200', 'dark:border-gray-700');
+                });
+                btn.classList.add('active', 'bg-apple-blue', 'text-white');
+                btn.classList.remove('bg-white', 'dark:bg-apple-dark', 'text-gray-600', 'dark:text-gray-300', 'border', 'border-gray-200', 'dark:border-gray-700');
+                selectedDays = parseInt(btn.dataset.days);
+            });
+        });
+
+        // Calculate
+        document.getElementById('calculateBtn').addEventListener('click', () => {
+            const enlistDate = new Date(document.getElementById('enlistDate').value);
+            if (isNaN(enlistDate.getTime())) {
+                alert('입대일을 선택해주세요.');
+                return;
+            }
+
+            const dischargeDate = new Date(enlistDate);
+            dischargeDate.setDate(dischargeDate.getDate() + selectedDays - 1);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const totalDays = selectedDays;
+            const servedDays = Math.max(0, Math.floor((today - enlistDate) / (1000 * 60 * 60 * 24)) + 1);
+            const remainingDays = Math.max(0, Math.floor((dischargeDate - today) / (1000 * 60 * 60 * 24)));
+            const progress = Math.min(100, Math.max(0, (servedDays / totalDays) * 100));
+
+            // Format date
+            const formatDate = (date) => {
+                return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+            };
+
+            // D-day
+            const dday = remainingDays === 0 ? 'D-Day!' : (remainingDays > 0 ? `D-${remainingDays}` : `D+${Math.abs(remainingDays)}`);
+
+            // Update UI
+            document.getElementById('dischargeDate').textContent = formatDate(dischargeDate);
+            document.getElementById('dday').textContent = dday;
+            document.getElementById('progressPercent').textContent = progress.toFixed(1) + '%';
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('servedDays').textContent = servedDays + '일 복무';
+            document.getElementById('remainingDays').textContent = remainingDays + '일 남음';
+            document.getElementById('totalDays').textContent = totalDays + '일';
+            document.getElementById('totalMonths').textContent = Math.round(totalDays / 30) + '개월';
+
+            document.getElementById('results').classList.remove('hidden');
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

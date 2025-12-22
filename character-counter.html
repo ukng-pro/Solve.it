@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>글자수 세기 - Solve.it</title>
+    <meta name="description" content="텍스트의 글자수, 단어수, 바이트를 실시간으로 확인하세요. 공백 포함/제외 옵션 제공.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'pretendard': ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        'apple-blue': '#007AFF',
+                        'apple-gray': '#F2F2F7',
+                        'apple-dark': '#1C1C1E',
+                        'apple-dark-card': '#2C2C2E',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .dark .glass { background: rgba(28, 28, 30, 0.8); }
+    </style>
+</head>
+<body class="bg-white dark:bg-apple-dark text-gray-900 dark:text-white min-h-screen transition-colors duration-300">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-700/50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html" class="text-xl font-bold text-apple-blue">Solve.it</a>
+                <button id="darkModeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-2xl mx-auto">
+            <!-- Title -->
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="type" class="w-8 h-8 text-purple-600 dark:text-purple-400"></i>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">글자수 세기</h1>
+                <p class="text-gray-500 dark:text-gray-400">텍스트의 글자수, 단어수, 바이트를 실시간으로 확인하세요</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-4 text-center">
+                    <p class="text-gray-500 dark:text-gray-400 text-xs mb-1">공백 포함</p>
+                    <p id="charWithSpace" class="text-2xl font-bold text-apple-blue">0</p>
+                </div>
+                <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-4 text-center">
+                    <p class="text-gray-500 dark:text-gray-400 text-xs mb-1">공백 제외</p>
+                    <p id="charNoSpace" class="text-2xl font-bold text-purple-500">0</p>
+                </div>
+                <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-4 text-center">
+                    <p class="text-gray-500 dark:text-gray-400 text-xs mb-1">단어수</p>
+                    <p id="wordCount" class="text-2xl font-bold text-green-500">0</p>
+                </div>
+                <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-4 text-center">
+                    <p class="text-gray-500 dark:text-gray-400 text-xs mb-1">바이트</p>
+                    <p id="byteCount" class="text-2xl font-bold text-orange-500">0</p>
+                </div>
+            </div>
+
+            <!-- Text Area -->
+            <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 shadow-sm mb-6">
+                <textarea
+                    id="textInput"
+                    rows="10"
+                    placeholder="여기에 텍스트를 입력하세요..."
+                    class="w-full bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 p-4 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all resize-none"
+                ></textarea>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap gap-3 mt-4">
+                    <button id="copyBtn" class="flex items-center gap-2 px-4 py-2 bg-apple-blue text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                        복사
+                    </button>
+                    <button id="clearBtn" class="flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        지우기
+                    </button>
+                </div>
+            </div>
+
+            <!-- Additional Info -->
+            <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 shadow-sm">
+                <h3 class="font-semibold mb-4">상세 정보</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                        <span class="text-gray-500 dark:text-gray-400">줄 수</span>
+                        <span id="lineCount" class="font-medium">0</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                        <span class="text-gray-500 dark:text-gray-400">문장 수</span>
+                        <span id="sentenceCount" class="font-medium">0</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                        <span class="text-gray-500 dark:text-gray-400">문단 수</span>
+                        <span id="paragraphCount" class="font-medium">0</span>
+                    </div>
+                    <div class="flex justify-between py-2">
+                        <span class="text-gray-500 dark:text-gray-400">예상 읽기 시간</span>
+                        <span id="readTime" class="font-medium">0분</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back Link -->
+            <div class="mt-8 text-center">
+                <a href="index.html" class="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-apple-blue transition-colors">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    모든 도구 보기
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Dark Mode
+        const html = document.documentElement;
+        if (localStorage.getItem('darkMode') === 'true' || (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        }
+        document.getElementById('darkModeToggle').addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('darkMode', html.classList.contains('dark'));
+            lucide.createIcons();
+        });
+
+        const textInput = document.getElementById('textInput');
+
+        // Count functions
+        const getByteLength = (str) => {
+            return new Blob([str]).size;
+        };
+
+        const updateCounts = () => {
+            const text = textInput.value;
+
+            // Character counts
+            const charWithSpace = text.length;
+            const charNoSpace = text.replace(/\s/g, '').length;
+
+            // Word count (handles Korean and English)
+            const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+            const wordCount = text.trim() === '' ? 0 : words.length;
+
+            // Byte count
+            const byteCount = getByteLength(text);
+
+            // Line count
+            const lineCount = text === '' ? 0 : text.split('\n').length;
+
+            // Sentence count (Korean: . ! ? / English: . ! ?)
+            const sentences = text.split(/[.!?。！？]+/).filter(s => s.trim().length > 0);
+            const sentenceCount = sentences.length;
+
+            // Paragraph count
+            const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+            const paragraphCount = text.trim() === '' ? 0 : paragraphs.length || (text.trim() ? 1 : 0);
+
+            // Reading time (average 500 characters per minute for Korean)
+            const readTime = Math.ceil(charNoSpace / 500);
+
+            // Update UI
+            document.getElementById('charWithSpace').textContent = charWithSpace.toLocaleString();
+            document.getElementById('charNoSpace').textContent = charNoSpace.toLocaleString();
+            document.getElementById('wordCount').textContent = wordCount.toLocaleString();
+            document.getElementById('byteCount').textContent = byteCount.toLocaleString();
+            document.getElementById('lineCount').textContent = lineCount.toLocaleString();
+            document.getElementById('sentenceCount').textContent = sentenceCount.toLocaleString();
+            document.getElementById('paragraphCount').textContent = paragraphCount.toLocaleString();
+            document.getElementById('readTime').textContent = readTime + '분';
+        };
+
+        // Real-time counting
+        textInput.addEventListener('input', updateCounts);
+
+        // Copy button
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(textInput.value);
+                const btn = document.getElementById('copyBtn');
+                btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> 복사됨';
+                lucide.createIcons();
+                setTimeout(() => {
+                    btn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i> 복사';
+                    lucide.createIcons();
+                }, 2000);
+            } catch (err) {
+                alert('복사에 실패했습니다.');
+            }
+        });
+
+        // Clear button
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            textInput.value = '';
+            updateCounts();
+            textInput.focus();
+        });
+    </script>
+</body>
+</html>

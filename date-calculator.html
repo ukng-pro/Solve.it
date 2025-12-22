@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>날짜 계산기 - Solve.it</title>
+    <meta name="description" content="두 날짜 사이의 일수 또는 특정 일수 후의 날짜를 계산합니다. D-day 계산기.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'pretendard': ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        'apple-blue': '#007AFF',
+                        'apple-gray': '#F2F2F7',
+                        'apple-dark': '#1C1C1E',
+                        'apple-dark-card': '#2C2C2E',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .dark .glass { background: rgba(28, 28, 30, 0.8); }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="bg-white dark:bg-apple-dark text-gray-900 dark:text-white min-h-screen transition-colors duration-300">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-700/50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html" class="text-xl font-bold text-apple-blue">Solve.it</a>
+                <button id="darkModeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-2xl mx-auto">
+            <!-- Title -->
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="calendar" class="w-8 h-8 text-indigo-600 dark:text-indigo-400"></i>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">날짜 계산기</h1>
+                <p class="text-gray-500 dark:text-gray-400">두 날짜 사이의 일수 또는 특정 일수 후의 날짜를 계산합니다</p>
+            </div>
+
+            <!-- Mode Tabs -->
+            <div class="flex bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-1 mb-6">
+                <button id="modeTab1" class="mode-tab active flex-1 py-3 px-4 rounded-xl text-sm font-medium bg-white dark:bg-apple-dark shadow-sm transition-all">
+                    날짜 간격 계산
+                </button>
+                <button id="modeTab2" class="mode-tab flex-1 py-3 px-4 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 transition-all">
+                    날짜 더하기/빼기
+                </button>
+            </div>
+
+            <!-- Mode 1: 날짜 간격 계산 -->
+            <div id="mode1" class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 sm:p-8 shadow-sm mb-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    <!-- 시작일 -->
+                    <div>
+                        <label for="startDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">시작일</label>
+                        <input type="date" id="startDate" class="w-full px-4 py-3 bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all">
+                    </div>
+                    <!-- 종료일 -->
+                    <div>
+                        <label for="endDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">종료일</label>
+                        <input type="date" id="endDate" class="w-full px-4 py-3 bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all">
+                    </div>
+                </div>
+
+                <button id="calculateBtn1" class="w-full py-4 bg-apple-blue text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors">
+                    기간 계산하기
+                </button>
+            </div>
+
+            <!-- Mode 2: 날짜 더하기/빼기 -->
+            <div id="mode2" class="hidden bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 sm:p-8 shadow-sm mb-6">
+                <div class="mb-4">
+                    <label for="baseDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">기준일</label>
+                    <input type="date" id="baseDate" class="w-full px-4 py-3 bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <!-- 연산 선택 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">연산</label>
+                        <select id="operation" class="w-full px-4 py-3 bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all">
+                            <option value="add">더하기 (+)</option>
+                            <option value="subtract">빼기 (-)</option>
+                        </select>
+                    </div>
+                    <!-- 일수 -->
+                    <div>
+                        <label for="days" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">일수</label>
+                        <input type="number" id="days" placeholder="100" class="w-full px-4 py-3 bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all">
+                    </div>
+                </div>
+
+                <button id="calculateBtn2" class="w-full py-4 bg-apple-blue text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors">
+                    날짜 계산하기
+                </button>
+            </div>
+
+            <!-- Results -->
+            <div id="results" class="hidden">
+                <!-- 결과 카드 -->
+                <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 sm:p-8 text-white mb-4">
+                    <p id="resultLabel" class="text-indigo-100 text-sm mb-1">계산 결과</p>
+                    <p id="resultValue" class="text-4xl sm:text-5xl font-bold mb-2">365일</p>
+                    <p id="resultSub" class="text-indigo-100"></p>
+                </div>
+
+                <!-- 상세 정보 -->
+                <div id="detailCard" class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 shadow-sm">
+                    <h3 class="font-semibold mb-4">상세 정보</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">총 일수</span>
+                            <span id="detailDays" class="font-medium">365일</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">총 주</span>
+                            <span id="detailWeeks" class="font-medium">52주 1일</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">총 개월 (약)</span>
+                            <span id="detailMonths" class="font-medium">12개월</span>
+                        </div>
+                        <div class="flex justify-between py-2">
+                            <span class="text-gray-500 dark:text-gray-400">총 시간</span>
+                            <span id="detailHours" class="font-medium">8,760시간</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- D-Day Quick Calculator -->
+            <div class="mt-6 bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 shadow-sm">
+                <h3 class="font-semibold mb-4">오늘 기준 D-Day</h3>
+                <div class="mb-4">
+                    <label for="ddayDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">목표일</label>
+                    <input type="date" id="ddayDate" class="w-full px-4 py-3 bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all">
+                </div>
+                <div id="ddayResult" class="text-center py-4 bg-white dark:bg-apple-dark rounded-xl">
+                    <span class="text-gray-400">목표일을 선택하세요</span>
+                </div>
+            </div>
+
+            <!-- Back Link -->
+            <div class="mt-8 text-center">
+                <a href="index.html" class="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-apple-blue transition-colors">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    모든 도구 보기
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Dark Mode
+        const html = document.documentElement;
+        if (localStorage.getItem('darkMode') === 'true' || (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        }
+        document.getElementById('darkModeToggle').addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('darkMode', html.classList.contains('dark'));
+            lucide.createIcons();
+        });
+
+        // Set default dates
+        const today = new Date();
+        const formatDateInput = (date) => date.toISOString().split('T')[0];
+        document.getElementById('startDate').value = formatDateInput(today);
+        document.getElementById('baseDate').value = formatDateInput(today);
+
+        // Format date in Korean
+        const formatDateKR = (date) => {
+            const days = ['일', '월', '화', '수', '목', '금', '토'];
+            return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 (${days[date.getDay()]})`;
+        };
+
+        // Mode tabs
+        const modeTab1 = document.getElementById('modeTab1');
+        const modeTab2 = document.getElementById('modeTab2');
+        const mode1 = document.getElementById('mode1');
+        const mode2 = document.getElementById('mode2');
+
+        modeTab1.addEventListener('click', () => {
+            modeTab1.classList.add('active', 'bg-white', 'dark:bg-apple-dark', 'shadow-sm');
+            modeTab1.classList.remove('text-gray-600', 'dark:text-gray-400');
+            modeTab2.classList.remove('active', 'bg-white', 'dark:bg-apple-dark', 'shadow-sm');
+            modeTab2.classList.add('text-gray-600', 'dark:text-gray-400');
+            mode1.classList.remove('hidden');
+            mode2.classList.add('hidden');
+            document.getElementById('results').classList.add('hidden');
+        });
+
+        modeTab2.addEventListener('click', () => {
+            modeTab2.classList.add('active', 'bg-white', 'dark:bg-apple-dark', 'shadow-sm');
+            modeTab2.classList.remove('text-gray-600', 'dark:text-gray-400');
+            modeTab1.classList.remove('active', 'bg-white', 'dark:bg-apple-dark', 'shadow-sm');
+            modeTab1.classList.add('text-gray-600', 'dark:text-gray-400');
+            mode2.classList.remove('hidden');
+            mode1.classList.add('hidden');
+            document.getElementById('results').classList.add('hidden');
+        });
+
+        // Calculate date difference
+        document.getElementById('calculateBtn1').addEventListener('click', () => {
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                alert('날짜를 선택해주세요.');
+                return;
+            }
+
+            const diffTime = endDate - startDate;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const absDays = Math.abs(diffDays);
+
+            const weeks = Math.floor(absDays / 7);
+            const remainingDays = absDays % 7;
+            const months = (absDays / 30.44).toFixed(1);
+            const hours = absDays * 24;
+
+            document.getElementById('resultLabel').textContent = '두 날짜 사이의 기간';
+            document.getElementById('resultValue').textContent = `${absDays.toLocaleString()}일`;
+            document.getElementById('resultSub').textContent = `${formatDateKR(startDate)} ~ ${formatDateKR(endDate)}`;
+            document.getElementById('detailDays').textContent = absDays.toLocaleString() + '일';
+            document.getElementById('detailWeeks').textContent = `${weeks}주 ${remainingDays}일`;
+            document.getElementById('detailMonths').textContent = months + '개월';
+            document.getElementById('detailHours').textContent = hours.toLocaleString() + '시간';
+
+            document.getElementById('results').classList.remove('hidden');
+        });
+
+        // Calculate date add/subtract
+        document.getElementById('calculateBtn2').addEventListener('click', () => {
+            const baseDate = new Date(document.getElementById('baseDate').value);
+            const operation = document.getElementById('operation').value;
+            const days = parseInt(document.getElementById('days').value) || 0;
+
+            if (isNaN(baseDate.getTime())) {
+                alert('기준일을 선택해주세요.');
+                return;
+            }
+
+            if (days <= 0) {
+                alert('일수를 입력해주세요.');
+                return;
+            }
+
+            const resultDate = new Date(baseDate);
+            if (operation === 'add') {
+                resultDate.setDate(resultDate.getDate() + days);
+            } else {
+                resultDate.setDate(resultDate.getDate() - days);
+            }
+
+            const operationText = operation === 'add' ? '후' : '전';
+
+            document.getElementById('resultLabel').textContent = `${days}일 ${operationText}`;
+            document.getElementById('resultValue').textContent = formatDateKR(resultDate);
+            document.getElementById('resultSub').textContent = `기준일: ${formatDateKR(baseDate)}`;
+
+            const weeks = Math.floor(days / 7);
+            const remainingDays = days % 7;
+            const months = (days / 30.44).toFixed(1);
+            const hours = days * 24;
+
+            document.getElementById('detailDays').textContent = days.toLocaleString() + '일';
+            document.getElementById('detailWeeks').textContent = `${weeks}주 ${remainingDays}일`;
+            document.getElementById('detailMonths').textContent = months + '개월';
+            document.getElementById('detailHours').textContent = hours.toLocaleString() + '시간';
+
+            document.getElementById('results').classList.remove('hidden');
+        });
+
+        // D-Day Quick Calculator
+        document.getElementById('ddayDate').addEventListener('change', (e) => {
+            const targetDate = new Date(e.target.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            targetDate.setHours(0, 0, 0, 0);
+
+            const diffTime = targetDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            let ddayText = '';
+            let ddayClass = '';
+
+            if (diffDays === 0) {
+                ddayText = 'D-Day';
+                ddayClass = 'text-red-500';
+            } else if (diffDays > 0) {
+                ddayText = `D-${diffDays}`;
+                ddayClass = 'text-apple-blue';
+            } else {
+                ddayText = `D+${Math.abs(diffDays)}`;
+                ddayClass = 'text-gray-500';
+            }
+
+            document.getElementById('ddayResult').innerHTML = `
+                <span class="text-3xl font-bold ${ddayClass}">${ddayText}</span>
+                <p class="text-sm text-gray-400 mt-1">${formatDateKR(targetDate)}</p>
+            `;
+        });
+    </script>
+</body>
+</html>

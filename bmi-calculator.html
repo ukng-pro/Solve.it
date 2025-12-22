@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI 계산기 - Solve.it</title>
+    <meta name="description" content="키와 몸무게로 체질량지수(BMI)와 비만도를 확인하세요. 건강한 체중 관리를 위한 BMI 계산기.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'pretendard': ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        'apple-blue': '#007AFF',
+                        'apple-gray': '#F2F2F7',
+                        'apple-dark': '#1C1C1E',
+                        'apple-dark-card': '#2C2C2E',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .dark .glass { background: rgba(28, 28, 30, 0.8); }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="bg-white dark:bg-apple-dark text-gray-900 dark:text-white min-h-screen transition-colors duration-300">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-700/50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html" class="text-xl font-bold text-apple-blue">Solve.it</a>
+                <button id="darkModeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-2xl mx-auto">
+            <!-- Title -->
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="heart-pulse" class="w-8 h-8 text-red-600 dark:text-red-400"></i>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">BMI 계산기</h1>
+                <p class="text-gray-500 dark:text-gray-400">키와 몸무게로 체질량지수(BMI)를 확인하세요</p>
+            </div>
+
+            <!-- Calculator Card -->
+            <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 sm:p-8 shadow-sm mb-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    <!-- 키 입력 -->
+                    <div>
+                        <label for="height" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">키 (cm)</label>
+                        <div class="relative">
+                            <input type="number" id="height" placeholder="170" class="w-full px-4 py-3 bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all pr-12">
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">cm</span>
+                        </div>
+                    </div>
+                    <!-- 몸무게 입력 -->
+                    <div>
+                        <label for="weight" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">몸무게 (kg)</label>
+                        <div class="relative">
+                            <input type="number" id="weight" placeholder="65" step="0.1" class="w-full px-4 py-3 bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all pr-12">
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kg</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 계산 버튼 -->
+                <button id="calculateBtn" class="w-full py-4 bg-apple-blue text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors">
+                    BMI 계산하기
+                </button>
+            </div>
+
+            <!-- Results -->
+            <div id="results" class="hidden">
+                <!-- BMI 결과 카드 -->
+                <div id="bmiCard" class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 sm:p-8 text-white mb-4">
+                    <p class="text-green-100 text-sm mb-1">BMI 지수</p>
+                    <p id="bmiValue" class="text-5xl sm:text-6xl font-bold mb-2">22.5</p>
+                    <div class="flex items-center gap-2">
+                        <span id="bmiStatus" class="px-3 py-1 bg-white/20 rounded-full text-sm font-medium">정상</span>
+                    </div>
+                </div>
+
+                <!-- BMI 범위 차트 -->
+                <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 shadow-sm mb-4">
+                    <h3 class="font-semibold mb-4">BMI 범위</h3>
+                    <div class="relative h-8 rounded-full overflow-hidden mb-4">
+                        <div class="absolute inset-0 flex">
+                            <div class="w-[18%] bg-blue-400"></div>
+                            <div class="w-[17%] bg-green-400"></div>
+                            <div class="w-[15%] bg-yellow-400"></div>
+                            <div class="w-[15%] bg-orange-400"></div>
+                            <div class="w-[35%] bg-red-400"></div>
+                        </div>
+                        <div id="bmiIndicator" class="absolute top-0 bottom-0 w-1 bg-white shadow-lg transition-all duration-500" style="left: 50%">
+                            <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-white"></div>
+                        </div>
+                    </div>
+                    <div class="flex text-xs text-gray-500 dark:text-gray-400">
+                        <span class="w-[18%] text-center">저체중<br/>&lt;18.5</span>
+                        <span class="w-[17%] text-center">정상<br/>18.5-23</span>
+                        <span class="w-[15%] text-center">과체중<br/>23-25</span>
+                        <span class="w-[15%] text-center">비만<br/>25-30</span>
+                        <span class="w-[35%] text-center">고도비만<br/>&gt;30</span>
+                    </div>
+                </div>
+
+                <!-- 상세 정보 -->
+                <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 shadow-sm mb-4">
+                    <h3 class="font-semibold mb-4">건강 체중 정보</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">현재 BMI</span>
+                            <span id="currentBmi" class="font-medium">22.5</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">정상 체중 범위</span>
+                            <span id="normalRange" class="font-medium">53.5 ~ 68.4 kg</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">표준 체중</span>
+                            <span id="idealWeight" class="font-medium">63.6 kg</span>
+                        </div>
+                        <div class="flex justify-between py-2">
+                            <span class="text-gray-500 dark:text-gray-400">목표까지</span>
+                            <span id="weightDiff" class="font-medium text-green-500">정상 범위입니다</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BMI 기준표 -->
+                <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 shadow-sm">
+                    <h3 class="font-semibold mb-4">대한비만학회 기준 (아시아-태평양)</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center gap-3 py-2">
+                            <div class="w-4 h-4 rounded bg-blue-400"></div>
+                            <span class="text-gray-600 dark:text-gray-300">저체중: 18.5 미만</span>
+                        </div>
+                        <div class="flex items-center gap-3 py-2">
+                            <div class="w-4 h-4 rounded bg-green-400"></div>
+                            <span class="text-gray-600 dark:text-gray-300">정상: 18.5 ~ 22.9</span>
+                        </div>
+                        <div class="flex items-center gap-3 py-2">
+                            <div class="w-4 h-4 rounded bg-yellow-400"></div>
+                            <span class="text-gray-600 dark:text-gray-300">과체중 (비만 전단계): 23 ~ 24.9</span>
+                        </div>
+                        <div class="flex items-center gap-3 py-2">
+                            <div class="w-4 h-4 rounded bg-orange-400"></div>
+                            <span class="text-gray-600 dark:text-gray-300">1단계 비만: 25 ~ 29.9</span>
+                        </div>
+                        <div class="flex items-center gap-3 py-2">
+                            <div class="w-4 h-4 rounded bg-red-400"></div>
+                            <span class="text-gray-600 dark:text-gray-300">2단계 비만 이상: 30 이상</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back Link -->
+            <div class="mt-8 text-center">
+                <a href="index.html" class="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-apple-blue transition-colors">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    모든 도구 보기
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Dark Mode
+        const html = document.documentElement;
+        if (localStorage.getItem('darkMode') === 'true' || (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        }
+        document.getElementById('darkModeToggle').addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('darkMode', html.classList.contains('dark'));
+            lucide.createIcons();
+        });
+
+        // Calculate BMI
+        document.getElementById('calculateBtn').addEventListener('click', () => {
+            const height = parseFloat(document.getElementById('height').value) || 0;
+            const weight = parseFloat(document.getElementById('weight').value) || 0;
+
+            if (height <= 0 || weight <= 0) {
+                alert('키와 몸무게를 입력해주세요.');
+                return;
+            }
+
+            const heightM = height / 100;
+            const bmi = weight / (heightM * heightM);
+
+            // BMI 상태 판정 (아시아-태평양 기준)
+            let status, colorClass, gradient;
+            if (bmi < 18.5) {
+                status = '저체중';
+                gradient = 'from-blue-500 to-blue-600';
+            } else if (bmi < 23) {
+                status = '정상';
+                gradient = 'from-green-500 to-green-600';
+            } else if (bmi < 25) {
+                status = '과체중';
+                gradient = 'from-yellow-500 to-yellow-600';
+            } else if (bmi < 30) {
+                status = '비만';
+                gradient = 'from-orange-500 to-orange-600';
+            } else {
+                status = '고도비만';
+                gradient = 'from-red-500 to-red-600';
+            }
+
+            // BMI 인디케이터 위치 계산 (0-40 범위를 0-100%로 매핑)
+            const indicatorPos = Math.min(Math.max((bmi / 40) * 100, 2), 98);
+
+            // 정상 체중 범위 계산
+            const normalMin = 18.5 * heightM * heightM;
+            const normalMax = 22.9 * heightM * heightM;
+            const idealWeight = 21 * heightM * heightM;
+
+            // 목표까지 차이
+            let weightDiff = '';
+            let weightDiffClass = 'text-green-500';
+            if (bmi < 18.5) {
+                const diff = normalMin - weight;
+                weightDiff = `+${diff.toFixed(1)}kg 증량 필요`;
+                weightDiffClass = 'text-blue-500';
+            } else if (bmi > 22.9) {
+                const diff = weight - normalMax;
+                weightDiff = `-${diff.toFixed(1)}kg 감량 필요`;
+                weightDiffClass = 'text-orange-500';
+            } else {
+                weightDiff = '정상 범위입니다';
+            }
+
+            // Update UI
+            document.getElementById('bmiValue').textContent = bmi.toFixed(1);
+            document.getElementById('bmiStatus').textContent = status;
+            document.getElementById('bmiCard').className = `bg-gradient-to-br ${gradient} rounded-2xl p-6 sm:p-8 text-white mb-4`;
+            document.getElementById('bmiIndicator').style.left = indicatorPos + '%';
+            document.getElementById('currentBmi').textContent = bmi.toFixed(1);
+            document.getElementById('normalRange').textContent = `${normalMin.toFixed(1)} ~ ${normalMax.toFixed(1)} kg`;
+            document.getElementById('idealWeight').textContent = idealWeight.toFixed(1) + ' kg';
+            document.getElementById('weightDiff').textContent = weightDiff;
+            document.getElementById('weightDiff').className = `font-medium ${weightDiffClass}`;
+
+            document.getElementById('results').classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>

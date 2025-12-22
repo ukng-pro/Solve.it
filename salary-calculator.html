@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>연봉 실수령액 계산기 - Solve.it</title>
+    <meta name="description" content="연봉에서 세금과 4대보험을 제외한 실제 월급을 계산합니다. 2024년 기준 정확한 실수령액 확인.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'pretendard': ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        'apple-blue': '#007AFF',
+                        'apple-gray': '#F2F2F7',
+                        'apple-dark': '#1C1C1E',
+                        'apple-dark-card': '#2C2C2E',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .dark .glass { background: rgba(28, 28, 30, 0.8); }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="bg-white dark:bg-apple-dark text-gray-900 dark:text-white min-h-screen transition-colors duration-300">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-700/50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html" class="text-xl font-bold text-apple-blue">Solve.it</a>
+                <button id="darkModeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-2xl mx-auto">
+            <!-- Title -->
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="wallet" class="w-8 h-8 text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">연봉 실수령액 계산기</h1>
+                <p class="text-gray-500 dark:text-gray-400">세금과 4대보험을 제외한 실제 월급을 계산합니다</p>
+            </div>
+
+            <!-- Calculator Card -->
+            <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 sm:p-8 shadow-sm mb-6">
+                <!-- 연봉 입력 -->
+                <div class="mb-6">
+                    <label for="annualSalary" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">연봉 (만원)</label>
+                    <div class="relative">
+                        <input type="number" id="annualSalary" placeholder="5000" class="w-full px-4 py-3 bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all pr-16">
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">만원</span>
+                    </div>
+                </div>
+
+                <!-- 부양가족 수 -->
+                <div class="mb-6">
+                    <label for="dependents" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">부양가족 수 (본인 포함)</label>
+                    <select id="dependents" class="w-full px-4 py-3 bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all">
+                        <option value="1">1명 (본인만)</option>
+                        <option value="2">2명</option>
+                        <option value="3">3명</option>
+                        <option value="4">4명</option>
+                        <option value="5">5명 이상</option>
+                    </select>
+                </div>
+
+                <!-- 비과세액 -->
+                <div class="mb-6">
+                    <label for="taxExempt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">비과세액 (월, 만원)</label>
+                    <div class="relative">
+                        <input type="number" id="taxExempt" placeholder="20" value="20" class="w-full px-4 py-3 bg-white dark:bg-apple-dark rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20 transition-all pr-16">
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">만원</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">식대, 교통비 등 (일반적으로 20만원)</p>
+                </div>
+
+                <!-- 계산 버튼 -->
+                <button id="calculateBtn" class="w-full py-4 bg-apple-blue text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors">
+                    실수령액 계산하기
+                </button>
+            </div>
+
+            <!-- Results -->
+            <div id="results" class="hidden">
+                <!-- 실수령액 카드 -->
+                <div class="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl p-6 sm:p-8 text-white mb-4">
+                    <p class="text-yellow-100 text-sm mb-1">예상 월 실수령액</p>
+                    <p id="monthlyNet" class="text-4xl sm:text-5xl font-bold mb-4">3,500,000원</p>
+                    <div class="flex items-center gap-4 text-sm">
+                        <div>
+                            <span class="text-yellow-100">연 실수령액</span>
+                            <span id="yearlyNet" class="ml-2 font-semibold">42,000,000원</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 공제 내역 -->
+                <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 shadow-sm mb-4">
+                    <h3 class="font-semibold mb-4">월 공제 내역</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">월 급여</span>
+                            <span id="monthlySalary" class="font-medium">4,166,667원</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">국민연금 (4.5%)</span>
+                            <span id="pension" class="font-medium text-red-500">-187,500원</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">건강보험 (3.545%)</span>
+                            <span id="health" class="font-medium text-red-500">-147,708원</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">장기요양보험 (12.95%)</span>
+                            <span id="longTermCare" class="font-medium text-red-500">-19,128원</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">고용보험 (0.9%)</span>
+                            <span id="employment" class="font-medium text-red-500">-37,500원</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">소득세</span>
+                            <span id="incomeTax" class="font-medium text-red-500">-150,000원</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-500 dark:text-gray-400">지방소득세 (10%)</span>
+                            <span id="localTax" class="font-medium text-red-500">-15,000원</span>
+                        </div>
+                        <div class="flex justify-between py-3 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 -mx-3">
+                            <span class="font-semibold text-red-600 dark:text-red-400">총 공제액</span>
+                            <span id="totalDeduction" class="font-bold text-red-600 dark:text-red-400">-556,836원</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4대보험 요약 -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-5 text-center">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-1">4대보험 합계</p>
+                        <p id="insuranceTotal" class="text-xl font-bold text-red-500">391,836원</p>
+                    </div>
+                    <div class="bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-5 text-center">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-1">세금 합계</p>
+                        <p id="taxTotal" class="text-xl font-bold text-red-500">165,000원</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back Link -->
+            <div class="mt-8 text-center">
+                <a href="index.html" class="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-apple-blue transition-colors">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    모든 도구 보기
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Dark Mode
+        const html = document.documentElement;
+        if (localStorage.getItem('darkMode') === 'true' || (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        }
+        document.getElementById('darkModeToggle').addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('darkMode', html.classList.contains('dark'));
+            lucide.createIcons();
+        });
+
+        // Format number
+        const formatNumber = (num) => Math.round(num).toLocaleString('ko-KR');
+
+        // 간이세액표 기반 소득세 계산 (2024년 기준 간소화)
+        const calculateIncomeTax = (monthlyTaxable, dependents) => {
+            // 연간 과세표준 추정
+            const yearlyTaxable = monthlyTaxable * 12;
+
+            // 근로소득공제
+            let deduction = 0;
+            if (yearlyTaxable <= 5000000) {
+                deduction = yearlyTaxable * 0.7;
+            } else if (yearlyTaxable <= 15000000) {
+                deduction = 3500000 + (yearlyTaxable - 5000000) * 0.4;
+            } else if (yearlyTaxable <= 45000000) {
+                deduction = 7500000 + (yearlyTaxable - 15000000) * 0.15;
+            } else if (yearlyTaxable <= 100000000) {
+                deduction = 12000000 + (yearlyTaxable - 45000000) * 0.05;
+            } else {
+                deduction = 14750000 + (yearlyTaxable - 100000000) * 0.02;
+            }
+
+            // 과세표준
+            const taxBase = Math.max(0, yearlyTaxable - deduction - (1500000 * dependents));
+
+            // 세율 적용
+            let tax = 0;
+            if (taxBase <= 14000000) {
+                tax = taxBase * 0.06;
+            } else if (taxBase <= 50000000) {
+                tax = 840000 + (taxBase - 14000000) * 0.15;
+            } else if (taxBase <= 88000000) {
+                tax = 6240000 + (taxBase - 50000000) * 0.24;
+            } else if (taxBase <= 150000000) {
+                tax = 15360000 + (taxBase - 88000000) * 0.35;
+            } else if (taxBase <= 300000000) {
+                tax = 37060000 + (taxBase - 150000000) * 0.38;
+            } else if (taxBase <= 500000000) {
+                tax = 94060000 + (taxBase - 300000000) * 0.4;
+            } else if (taxBase <= 1000000000) {
+                tax = 174060000 + (taxBase - 500000000) * 0.42;
+            } else {
+                tax = 384060000 + (taxBase - 1000000000) * 0.45;
+            }
+
+            return Math.max(0, Math.round(tax / 12));
+        };
+
+        // Calculate
+        document.getElementById('calculateBtn').addEventListener('click', () => {
+            const annualSalary = parseFloat(document.getElementById('annualSalary').value) * 10000 || 0;
+            const dependents = parseInt(document.getElementById('dependents').value) || 1;
+            const taxExempt = parseFloat(document.getElementById('taxExempt').value) * 10000 || 200000;
+
+            if (annualSalary <= 0) {
+                alert('연봉을 입력해주세요.');
+                return;
+            }
+
+            const monthlySalary = annualSalary / 12;
+            const monthlyTaxable = monthlySalary - taxExempt;
+
+            // 4대보험 계산 (2024년 기준)
+            // 국민연금: 과세소득의 4.5% (상한 590만원)
+            const pensionBase = Math.min(monthlyTaxable, 5900000);
+            const pension = Math.round(pensionBase * 0.045);
+
+            // 건강보험: 과세소득의 3.545%
+            const health = Math.round(monthlyTaxable * 0.03545);
+
+            // 장기요양보험: 건강보험의 12.95%
+            const longTermCare = Math.round(health * 0.1295);
+
+            // 고용보험: 과세소득의 0.9%
+            const employment = Math.round(monthlyTaxable * 0.009);
+
+            // 소득세
+            const incomeTax = calculateIncomeTax(monthlyTaxable, dependents);
+
+            // 지방소득세: 소득세의 10%
+            const localTax = Math.round(incomeTax * 0.1);
+
+            // 총 공제액
+            const totalDeduction = pension + health + longTermCare + employment + incomeTax + localTax;
+
+            // 실수령액
+            const monthlyNet = monthlySalary - totalDeduction;
+            const yearlyNet = monthlyNet * 12;
+
+            // 4대보험 합계
+            const insuranceTotal = pension + health + longTermCare + employment;
+            const taxTotal = incomeTax + localTax;
+
+            // Update UI
+            document.getElementById('monthlySalary').textContent = formatNumber(monthlySalary) + '원';
+            document.getElementById('pension').textContent = '-' + formatNumber(pension) + '원';
+            document.getElementById('health').textContent = '-' + formatNumber(health) + '원';
+            document.getElementById('longTermCare').textContent = '-' + formatNumber(longTermCare) + '원';
+            document.getElementById('employment').textContent = '-' + formatNumber(employment) + '원';
+            document.getElementById('incomeTax').textContent = '-' + formatNumber(incomeTax) + '원';
+            document.getElementById('localTax').textContent = '-' + formatNumber(localTax) + '원';
+            document.getElementById('totalDeduction').textContent = '-' + formatNumber(totalDeduction) + '원';
+            document.getElementById('monthlyNet').textContent = formatNumber(monthlyNet) + '원';
+            document.getElementById('yearlyNet').textContent = formatNumber(yearlyNet) + '원';
+            document.getElementById('insuranceTotal').textContent = formatNumber(insuranceTotal) + '원';
+            document.getElementById('taxTotal').textContent = formatNumber(taxTotal) + '원';
+
+            document.getElementById('results').classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
