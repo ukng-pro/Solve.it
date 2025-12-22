@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solve.it - 당신의 일상을 가볍게 만드는 모든 도구</title>
+    <meta name="description" content="심플하지만 강력한 유틸리티 도구 모음. 군 전역일 계산기, 주식 수익률 계산기, 글자수 세기 등 다양한 도구를 제공합니다.">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Pretendard Font -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'pretendard': ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        'apple-blue': '#007AFF',
+                        'apple-gray': '#F2F2F7',
+                        'apple-dark': '#1C1C1E',
+                        'apple-dark-card': '#2C2C2E',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        }
+
+        /* Glassmorphism Effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .dark .glass {
+            background: rgba(28, 28, 30, 0.8);
+        }
+
+        /* Card Hover Animation */
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .card-hover:hover {
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Search Input Focus */
+        .search-input:focus {
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.2);
+        }
+
+        /* Smooth transitions for dark mode */
+        html {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Ad slot styling */
+        .ad-slot {
+            border: 2px dashed #d1d5db;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+        }
+
+        .dark .ad-slot {
+            border-color: #4b5563;
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-apple-dark text-gray-900 dark:text-white min-h-screen transition-colors duration-300">
+
+    <!-- Sticky Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-700/50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <a href="#" class="text-xl font-bold text-apple-blue">
+                    Solve.it
+                </a>
+
+                <!-- Right Side Buttons -->
+                <div class="flex items-center gap-3">
+                    <!-- Dark Mode Toggle -->
+                    <button id="darkModeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="다크모드 토글">
+                        <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                    </button>
+
+                    <!-- Service Suggestion Button -->
+                    <a href="mailto:contact@solve.it" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-apple-blue text-white rounded-full text-sm font-medium hover:bg-blue-600 transition-colors">
+                        <i data-lucide="lightbulb" class="w-4 h-4"></i>
+                        서비스 제안
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Top Ad Slot -->
+    <div class="pt-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="ad-slot rounded-xl h-20 flex items-center justify-center text-gray-400 dark:text-gray-600 text-sm">
+                <i data-lucide="megaphone" class="w-5 h-5 mr-2"></i>
+                광고 영역
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="pt-12 pb-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-6xl mx-auto text-center">
+            <!-- Main Copy -->
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
+                <span class="text-gray-900 dark:text-white">심플하지만 강력한</span>
+                <br>
+                <span class="text-apple-blue">도구 모음</span>
+            </h1>
+            <p class="text-gray-500 dark:text-gray-400 text-lg mb-8 max-w-xl mx-auto">
+                당신의 일상을 가볍게 만드는 모든 도구
+            </p>
+
+            <!-- Search Bar -->
+            <div class="max-w-xl mx-auto relative">
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="필요한 도구를 검색하세요..."
+                        class="search-input w-full pl-12 pr-4 py-4 bg-apple-gray dark:bg-apple-dark-card rounded-2xl border-none outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-base transition-all"
+                    >
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category Tabs -->
+    <section class="px-4 sm:px-6 lg:px-8 pb-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                <button class="category-tab active px-4 py-2 rounded-full text-sm font-medium bg-apple-blue text-white whitespace-nowrap transition-all" data-category="all">
+                    전체
+                </button>
+                <button class="category-tab px-4 py-2 rounded-full text-sm font-medium bg-apple-gray dark:bg-apple-dark-card text-gray-600 dark:text-gray-300 whitespace-nowrap hover:bg-gray-200 dark:hover:bg-gray-700 transition-all" data-category="military">
+                    군대
+                </button>
+                <button class="category-tab px-4 py-2 rounded-full text-sm font-medium bg-apple-gray dark:bg-apple-dark-card text-gray-600 dark:text-gray-300 whitespace-nowrap hover:bg-gray-200 dark:hover:bg-gray-700 transition-all" data-category="finance">
+                    금융
+                </button>
+                <button class="category-tab px-4 py-2 rounded-full text-sm font-medium bg-apple-gray dark:bg-apple-dark-card text-gray-600 dark:text-gray-300 whitespace-nowrap hover:bg-gray-200 dark:hover:bg-gray-700 transition-all" data-category="life">
+                    생활
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Service Cards Grid -->
+    <section class="px-4 sm:px-6 lg:px-8 pb-12">
+        <div class="max-w-6xl mx-auto">
+            <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Card 1: 군 전역일 계산기 -->
+                <article class="service-card card-hover bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 shadow-sm" data-category="military" data-keywords="군대 전역 군인 입대 복무 디데이">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="shield" class="w-6 h-6 text-green-600 dark:text-green-400"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-1">군 전역일 계산기</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">입대일을 입력하면 전역일과 복무 진행률을 계산해드립니다.</p>
+                            <a href="#" class="inline-flex items-center gap-1 text-apple-blue font-medium text-sm hover:underline">
+                                바로가기
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 2: 주식 수익률 계산기 -->
+                <article class="service-card card-hover bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 shadow-sm" data-category="finance" data-keywords="주식 투자 수익 수익률 매수 매도 증권">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="trending-up" class="w-6 h-6 text-blue-600 dark:text-blue-400"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-1">주식 수익률 계산기</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">매수가와 매도가를 입력하여 수익률을 간편하게 계산하세요.</p>
+                            <a href="#" class="inline-flex items-center gap-1 text-apple-blue font-medium text-sm hover:underline">
+                                바로가기
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 3: 글자수 세기 -->
+                <article class="service-card card-hover bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 shadow-sm" data-category="life" data-keywords="글자 글자수 문자 텍스트 카운트 세기 공백">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="type" class="w-6 h-6 text-purple-600 dark:text-purple-400"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-1">글자수 세기</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">텍스트의 글자수, 단어수, 바이트를 실시간으로 확인하세요.</p>
+                            <a href="#" class="inline-flex items-center gap-1 text-apple-blue font-medium text-sm hover:underline">
+                                바로가기
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 4: 연봉 실수령액 계산기 -->
+                <article class="service-card card-hover bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 shadow-sm" data-category="finance" data-keywords="연봉 월급 실수령 세금 4대보험 급여">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="wallet" class="w-6 h-6 text-yellow-600 dark:text-yellow-400"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-1">연봉 실수령액 계산기</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">연봉에서 세금과 4대보험을 제외한 실수령액을 계산합니다.</p>
+                            <a href="#" class="inline-flex items-center gap-1 text-apple-blue font-medium text-sm hover:underline">
+                                바로가기
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 5: BMI 계산기 -->
+                <article class="service-card card-hover bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 shadow-sm" data-category="life" data-keywords="BMI 체질량 비만 건강 체중 키 다이어트">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="heart-pulse" class="w-6 h-6 text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-1">BMI 계산기</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">키와 몸무게로 체질량지수(BMI)와 비만도를 확인하세요.</p>
+                            <a href="#" class="inline-flex items-center gap-1 text-apple-blue font-medium text-sm hover:underline">
+                                바로가기
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 6: 날짜 계산기 -->
+                <article class="service-card card-hover bg-apple-gray dark:bg-apple-dark-card rounded-2xl p-6 shadow-sm" data-category="life" data-keywords="날짜 디데이 D-day 일수 기간 계산">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="calendar" class="w-6 h-6 text-indigo-600 dark:text-indigo-400"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-1">날짜 계산기</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">두 날짜 사이의 일수 또는 특정 일수 후의 날짜를 계산합니다.</p>
+                            <a href="#" class="inline-flex items-center gap-1 text-apple-blue font-medium text-sm hover:underline">
+                                바로가기
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+
+            <!-- No Results Message -->
+            <div id="noResults" class="hidden text-center py-12">
+                <i data-lucide="search-x" class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+                <p class="text-gray-500 dark:text-gray-400">검색 결과가 없습니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bottom Ad Slot -->
+    <section class="px-4 sm:px-6 lg:px-8 pb-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="ad-slot rounded-xl h-24 flex items-center justify-center text-gray-400 dark:text-gray-600 text-sm">
+                <i data-lucide="megaphone" class="w-5 h-5 mr-2"></i>
+                광고 영역
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 dark:border-gray-800 py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-6">
+                    <a href="#" class="text-lg font-bold text-apple-blue">Solve.it</a>
+                    <nav class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                        <a href="#" class="hover:text-gray-900 dark:hover:text-white transition-colors">이용약관</a>
+                        <a href="#" class="hover:text-gray-900 dark:hover:text-white transition-colors">개인정보처리방침</a>
+                        <a href="#" class="hover:text-gray-900 dark:hover:text-white transition-colors">문의하기</a>
+                    </nav>
+                </div>
+                <p class="text-sm text-gray-400 dark:text-gray-500">
+                    &copy; 2024 Solve.it. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const html = document.documentElement;
+
+        // Check for saved preference or system preference
+        if (localStorage.getItem('darkMode') === 'true' ||
+            (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        }
+
+        darkModeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('darkMode', html.classList.contains('dark'));
+            lucide.createIcons(); // Re-render icons after toggle
+        });
+
+        // Search Filtering
+        const searchInput = document.getElementById('searchInput');
+        const cardsGrid = document.getElementById('cardsGrid');
+        const cards = document.querySelectorAll('.service-card');
+        const noResults = document.getElementById('noResults');
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            // Reset category tabs when searching
+            if (query) {
+                document.querySelectorAll('.category-tab').forEach(tab => {
+                    tab.classList.remove('active', 'bg-apple-blue', 'text-white');
+                    tab.classList.add('bg-apple-gray', 'dark:bg-apple-dark-card', 'text-gray-600', 'dark:text-gray-300');
+                });
+            }
+
+            cards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+                const keywords = card.dataset.keywords?.toLowerCase() || '';
+
+                const isMatch = !query ||
+                    title.includes(query) ||
+                    description.includes(query) ||
+                    keywords.includes(query);
+
+                card.style.display = isMatch ? 'block' : 'none';
+                if (isMatch) visibleCount++;
+            });
+
+            noResults.classList.toggle('hidden', visibleCount > 0);
+        });
+
+        // Category Filtering
+        const categoryTabs = document.querySelectorAll('.category-tab');
+
+        categoryTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Clear search input when clicking category
+                searchInput.value = '';
+
+                // Update active state
+                categoryTabs.forEach(t => {
+                    t.classList.remove('active', 'bg-apple-blue', 'text-white');
+                    t.classList.add('bg-apple-gray', 'dark:bg-apple-dark-card', 'text-gray-600', 'dark:text-gray-300');
+                });
+                tab.classList.add('active', 'bg-apple-blue', 'text-white');
+                tab.classList.remove('bg-apple-gray', 'dark:bg-apple-dark-card', 'text-gray-600', 'dark:text-gray-300');
+
+                const category = tab.dataset.category;
+                let visibleCount = 0;
+
+                cards.forEach(card => {
+                    const cardCategory = card.dataset.category;
+                    const isMatch = category === 'all' || cardCategory === category;
+                    card.style.display = isMatch ? 'block' : 'none';
+                    if (isMatch) visibleCount++;
+                });
+
+                noResults.classList.toggle('hidden', visibleCount > 0);
+            });
+        });
+    </script>
+</body>
+</html>
